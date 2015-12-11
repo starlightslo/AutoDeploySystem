@@ -6,7 +6,14 @@ var server = require("./modules/server");
 // Load ADS Config file
 //var ADSConfig = require('./ads_config');
 var fs = require('fs');
-var ADSConfig = JSON.parse(fs.readFileSync('./ads_config').toString());
+var ADSConfigFile = './ads_config';
+var ADSConfig = JSON.parse(fs.readFileSync(ADSConfigFile).toString());
+
+// Save function
+function save() {
+	var data = JSON.stringify(ADSConfig);
+	fs.writeFileSync(ADSConfigFile, data);
+}
 
 // Run up server
 if (config.is_server) {
@@ -110,6 +117,7 @@ if (config.is_server) {
 					}
 					ADSConfig.client_list.push(client);
 					console.log(ADSConfig.client_list);
+					save();
 					var resp = {
 						'code': 200,
 						'result': 'OK'
@@ -157,6 +165,7 @@ if (config.is_server) {
 							break;
 						}
 					}
+					save();
 					var resp = {
 						'code': 200,
 						'result': 'OK'
@@ -196,6 +205,7 @@ if (config.is_server) {
 							break;
 						}
 					}
+					save();
 					var resp = {
 						'code': 200,
 						'result': 'OK'
