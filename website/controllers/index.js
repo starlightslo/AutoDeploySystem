@@ -69,15 +69,16 @@ myApp.controller('ADSController', ['$scope', '$http', '$location', '$routeParams
 		});
 	}
 
-	$scope.modifyClient = function() {
+	$scope.modifyClient = function(index) {
+		console.log(index);
 		var client = {
-			_id: $scope.client._id,
-			ip: $scope.client.ip,
-			port: $scope.client.port,
-			secret: $scope.client.secret,
-			command: $scope.client.command_list
+			_id: $scope.clients[index]._id,
+			ip: $scope.clients[index].ip,
+			port: $scope.clients[index].port,
+			secret: $scope.clients[index].secret,
+			command: $scope.clients[index].command_list
 		}
-		console.log('modify id: ' + $scope.client._id);
+		console.log('modify id: ' + $scope.clients[index]._id);
 
 		$http.post('/api/client/modify/', client).success(function(response) {
 			console.log('modify response: ' + response);

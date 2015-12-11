@@ -20,18 +20,18 @@
 		<h3 class="panel-title">Client List</h3>
 	</div>
 	<div class="table-responsive">
-		<table class="table table-striped" style="text-align: center;">
-			<thead>
-				<tr>
-					<th style="text-align: center;">Client</th>
-					<th style="text-align: center;">Secret</th>
-					<th style="text-align: center;">Command</th>
-					<th style="text-align: center;">Functions</th>
-				</tr>
-			</thead>
-			<tbody ng-repeat="client in clients">
-				<form ng-submit="modifyClient()" ng-controller="ADSController" class="form-signin">
+		<form ng-controller="ADSController">
+			<table class="table table-striped" style="text-align: center;">
+				<thead>
 					<tr>
+						<th style="text-align: center;">Client</th>
+						<th style="text-align: center;">Secret</th>
+						<th style="text-align: center;">Command</th>
+						<th style="text-align: center;">Functions</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="client in clients">
 						<td class="form-inline" style="vertical-align: middle;">
 							<input type="text" class="form-control" style="width: 100px;" ng-model="client.ip" value="{{client.ip}}" />
 							<input type="text" class="form-control" style="width: 70px;" ng-model="client.port" value="{{client.port}}" />
@@ -44,12 +44,12 @@
 						</td>
 						<td class="form-inline" style="vertical-align: middle;">
 							<input type="hidden" ng-model="client._id" value="{{client._id}}" />
-							<input type="submit" class="btn btn-xs btn-primary" value="Modify"></input>
+							<input type="button" ng-click="modifyClient($index)" class="btn btn-xs btn-primary" value="Modify"></input>
 							<a class="btn btn-xs btn-primary" href="#/delete/client/{{client._id}}">Delete</a>
 						</td>
 					</tr>
-				</form>
-			</tbody>
-		</table>
+				</tbody>
+			</table>
+		</form>
 	</div>
 </div>
