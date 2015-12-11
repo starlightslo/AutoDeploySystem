@@ -1,56 +1,55 @@
-<div class="panel panel-default" ng-init="getClients()">
+<div class="panel panel-info" style="width: 350px; margin: 0 auto;" ng-init="getClients()">
 	<div class="panel-heading">
-		<h3 class="panel-title">Client List</h3>
+		<h3 class="panel-title">Add new client</h3>
 	</div>
 	<div class="panel-body">
-		<div class="row">
-			<div class="col-sm-3">
-				Client
-			</div>
-			<div class="col-sm-3">
-				Secret
-			</div>
-			<div class="col-sm-4">
-				Command
-			</div>
-			<div class="col-sm-2">
-				Functions
-			</div>
-			
-			<div ng-repeat="client in clients">
-				<form ng-submit="modifyClient()" ng-controller="ADSController" class="form-signin">
-					<div class="col-sm-3">
-						<input type="text" class="form-control" style="width: 100px;" ng-model="client.ip" value="{{client.ip}}" />
-						<input type="text" class="form-control" style="width: 70px;" ng-model="client.port" value="{{client.port}}" />
-					</div>
-					<div class="col-sm-3">
-						<input type="text" class="form-control" style="width: 250px;" ng-model="client.secret" value="{{client.secret}}" />
-					</div>
-					<div class="col-sm-4">
-						<textarea class="form-control" ng-model="client.command_list">{{client.command_list}}</textarea>
-					</div>
-					<div class="col-sm-2">
-						<input type="hidden" ng-model="client._id" value="{{client._id}}" />
-						<input type="submit" class="btn btn-primary" value="Modify"></input>
-						<a class="btn btn-primary" href="#/delete/client/{{client._id}}">Delete</a>
-					</div>
-				</form>
-			</div>
-			
-		</div>
-	</div>
-
-	<div class="panel panel-default">
 		<form ng-submit="addClient()" ng-controller="ADSController" class="form-signin">
-			<h2 class="form-signin-heading">Add new client</h2>
 			<label for="inputIP" class="sr-only">IP: </label>
 			<input type="text" class="form-control" ng-model="client.ip" placeholder="IP" required autofocus>
 			<label for="inputPort" class="sr-only">Port: </label>
 			<input type="text" class="form-control" ng-model="client.port" placeholder="Port" required>
 			<input type="text" class="form-control" ng-model="client.secret" placeholder="Secret" required>
-			<textarea class="form-control" ng-model="client.command_list"></textarea>
+			<textarea class="form-control" ng-model="client.command_list" placeholder="Command List" rows="3"></textarea>
 			<button class="btn btn-lg btn-primary btn-block" type="submit">Add</button>
 		</form>
 	</div>
-
+</div>
+<hr />
+<div class="panel panel-success" ng-init="getClients()">
+	<div class="panel-heading">
+		<h3 class="panel-title">Client List</h3>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-striped" style="text-align: center;">
+			<thead>
+				<tr>
+					<th style="text-align: center;">Client</th>
+					<th style="text-align: center;">Secret</th>
+					<th style="text-align: center;">Command</th>
+					<th style="text-align: center;">Functions</th>
+				</tr>
+			</thead>
+			<tbody ng-repeat="client in clients">
+				<form ng-submit="modifyClient()" ng-controller="ADSController" class="form-signin">
+					<tr>
+						<td class="form-inline" style="vertical-align: middle;">
+							<input type="text" class="form-control" style="width: 100px;" ng-model="client.ip" value="{{client.ip}}" />
+							<input type="text" class="form-control" style="width: 70px;" ng-model="client.port" value="{{client.port}}" />
+						</td>
+						<td class="form-inline" style="vertical-align: middle;">
+							<input type="text" class="form-control" style="width:100%" ng-model="client.secret" value="{{client.secret}}" />
+						</td>
+						<td class="form-inline" style="vertical-align: middle;">
+							<textarea class="form-control" style="width:100%" ng-model="client.command_list" rows="3">{{client.command_list}}</textarea>
+						</td>
+						<td class="form-inline" style="vertical-align: middle;">
+							<input type="hidden" ng-model="client._id" value="{{client._id}}" />
+							<input type="submit" class="btn btn-xs btn-primary" value="Modify"></input>
+							<a class="btn btn-xs btn-primary" href="#/delete/client/{{client._id}}">Delete</a>
+						</td>
+					</tr>
+				</form>
+			</tbody>
+		</table>
+	</div>
 </div>
