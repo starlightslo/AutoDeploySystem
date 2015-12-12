@@ -15,6 +15,37 @@ function save() {
 	fs.writeFileSync(ADSConfigFile, data);
 }
 
+// Check `cd` command to change current working directory
+function checkCD(command, cwd) {
+	if (command.indexOf('cd ') == 0) {
+		command = command.substr(3);
+		if (command.indexOf('/') == 0) {
+			cwd = command;
+		} else if (command.indexOf('../') == 0) {
+			while (command.indexOf('../') == 0) {
+				cwd = cwd.substr(0, cwd.lastIndexOf('/') - 1);
+				command = command.substr(3);
+			}
+		} else if (command.indexOf('~/') == 0) {
+			command = command.substr(2);
+		} else if (command == '~') {
+			return cwd;
+		} else if (command.indexOf('./') == 0) {
+			command = command.substr(2);
+		}
+		cwd = cwd + '/' + command;
+	}
+	return cwd;
+}
+
+// Deploy function
+function deploy(command, cwd, callback) {
+	var exec = require('child_process').exec;
+	exec(command, {cwd: cwd}, function(error, stdout, stderr) {
+		callback(error, stdout, stderr);
+	});
+}
+
 // Run up server
 if (config.is_server) {
 	serverApp = server().run(config.server.port, config.server.secret, true);
@@ -225,10 +256,42 @@ if (config.is_server) {
 
 // Run up client
 if (config.is_client) {
-	clientApp = server().run(config.client.port, config.secret, false);
+	clientApp = server().run(config.client.port, config.client.secret, false);
 	console.log("Auto Deploy Client is listening...");
 
 	clientApp.get('/', function(req, res) {
 		res.status(403).send('');
+	});
+
+	// Deploy
+	clientApp.post('/deploy', function(req, res) {
+		var resp = {};
+		var data = JSON.parse(req.rawBody);
+		if (config.client.secret == data.secret) {
+			var commandList = data.commandList;
+			var i = 0;
+			if (commandList.length > 0) {
+				var result = [];
+				var cwd = __dirname;
+				var handleDeploy = function(error, stdout, stderr) {
+					result.push(stdout);
+					i++;
+					if (i == commandList.length) {
+						resp = {
+							'code': 200,
+							'result': result
+						}
+						res.send(resp);
+					} else {
+						cwd = checkCD(commandList[i], cwd);
+						deploy(commandList[i], cwd, handleDeploy);
+					}
+				};
+				cwd = checkCD(commandList[i], cwd);
+				deploy(commandList[i], cwd, handleDeploy);
+			}
+		} else {
+			res.status(403).send('');
+		}
 	});
 }
