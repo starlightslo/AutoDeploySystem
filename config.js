@@ -9,6 +9,8 @@ module.exports = {
 	'is_client': true,
 	'client': {
 		'port': 7778,
-		'secret': 'ABCDEFG1234567890HIJKLMN'
+		'secret': 'ABCDEFG1234567890HIJKLMN',
+		'user': 'Tony',
+		'group': 'staff'
 	}
 }

@@ -20,7 +20,7 @@ function checkCD(command, cwd) {
 	if (command.indexOf('cd ') == 0) {
 		command = command.substr(3);
 		if (command.indexOf('/') == 0) {
-			cwd = command;
+			return command;
 		} else if (command.indexOf('../') == 0) {
 			while (command.indexOf('../') == 0) {
 				cwd = cwd.substr(0, cwd.lastIndexOf('/') - 1);
@@ -63,11 +63,16 @@ function requestDeploy(ip, port, secret, command, callback) {
 }
 
 // Deploy function
-function deploy(command, cwd, callback) {
-	var exec = require('child_process').exec;
-	exec(command, {cwd: cwd}, function(error, stdout, stderr) {
-		callback(error, stdout, stderr);
-	});
+function deploy(command, cwd) {
+	var userid = require('userid');
+	var execSync = require('child_process').execSync;
+	var uid = 0;
+	var gid = 0;
+	if (command.indexOf('sudo ') < 0) {
+		uid = userid.uid(config.client.user);
+		gid = userid.gid(config.client.group);
+	}
+	return execSync(command, {cwd: cwd, uid: uid, gid, gid});
 }
 
 // Run up server
@@ -370,26 +375,18 @@ if (config.is_client) {
 		if (config.client.secret == data.secret) {
 			var commandList = data.commandList;
 			var i = 0;
-			if (commandList.length > 0) {
-				var result = [];
-				var cwd = __dirname;
-				var handleDeploy = function(error, stdout, stderr) {
-					result.push(stdout);
-					i++;
-					if (i == commandList.length) {
-						var resp = {
-							'code': 200,
-							'result': result
-						}
-						res.json(resp);
-					} else {
-						cwd = checkCD(commandList[i], cwd);
-						deploy(commandList[i], cwd, handleDeploy);
-					}
-				};
+			var result = [];
+			var cwd = __dirname;
+			for (var i = 0 ; i < commandList.length ; i++) {
 				cwd = checkCD(commandList[i], cwd);
-				deploy(commandList[i], cwd, handleDeploy);
+				response = deploy(commandList[i], cwd);
+				result.push(response.toString());
 			}
+			var resp = {
+				'code': 200,
+				'result': result
+			}
+			res.json(resp);
 		} else {
 			res.status(403).send('');
 		}

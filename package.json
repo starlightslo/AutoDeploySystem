@@ -10,7 +10,8 @@
   	"express": "*",
     "express-session": "*",
   	"body-parser": "*",
-    "jsonwebtoken": "*"
+    "jsonwebtoken": "*",
+    "userid": "*"
   },
   "author": "Tony Huang",
   "license": "ISC"
