@@ -21,20 +21,20 @@ module.exports = function() {
 			// Handle rawBoday
 			app.use(function(req, res, next) {
 				var contentType = req.headers['content-type'] || '', mime = contentType.split(';')[0];
-				if (mime != 'text/plain') {
+				if ((mime != 'text/plain')) {
 					return next();
 				}
 
-			  req.rawBody = '';
-			  req.setEncoding('utf8');
+				req.rawBody = '';
+				//req.setEncoding('utf8');
 
-			  req.on('data', function(chunk) {
-			    req.rawBody += chunk;
-			  });
+				req.on('data', function(chunk) {
+					req.rawBody += chunk;
+				});
 
-			  req.on('end', function() {
-			    next();
-			  });
+				req.on('end', function() {
+					next();
+				});
 			});
 
 			// Handle body

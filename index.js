@@ -39,6 +39,30 @@ function checkCD(command, cwd) {
 }
 
 // Deploy function
+function requestDeploy(ip, port, secret, command, callback) {
+	var requests = require('./modules/requests');
+	var post_data = {
+		secret: secret,
+		commandList: command
+	}
+	post_data = JSON.stringify(post_data).toString();
+	
+	http = requests().http()
+	http.post(ip, '/deploy', port, post_data, function(res) {
+		var response = '';
+		res.setEncoding('utf8');
+		
+		res.on('data', function (chunk) {
+			response += chunk;
+		});
+
+		res.on('end', function() {
+			callback(response);
+		});
+	});
+}
+
+// Deploy function
 function deploy(command, cwd, callback) {
 	var exec = require('child_process').exec;
 	exec(command, {cwd: cwd}, function(error, stdout, stderr) {
@@ -50,6 +74,82 @@ function deploy(command, cwd, callback) {
 if (config.is_server) {
 	serverApp = server().run(config.server.port, config.server.secret, true);
 	console.log("Auto Deploy System is running...");
+
+	// Deploy
+	serverApp.post('/deploy', function(req, res) {
+		if (!req.headers.authorization) {
+			res.status(403).send('');
+		}
+
+		// Get authorization from header
+		var authorization = req.headers.authorization;
+		if (authorization.indexOf('ADS ') == 0) {
+			authorization = authorization.substr(4);
+			authorizations = authorization.split(',');
+			var username = '';
+			var password = '';
+			// Extract username and password
+			for (var i = 0 ; i < authorizations.length ; i++) {
+				if (authorizations[i].indexOf('username="') >= 0) {
+					var index = authorizations[i].indexOf('username="')+10;
+					username = authorizations[i].substr(index, authorizations[i].length-index-1);
+				} else if (authorizations[i].indexOf('password="') >= 0) {
+					var index = authorizations[i].indexOf('password="')+10;
+					password = authorizations[i].substr(index, authorizations[i].length-index-1);
+				}
+			}
+		} else {
+			res.status(403).send('');
+		}
+
+		// Validate username and password
+		if ((username == config.server.username) & (password == config.server.password)) {
+			//try {
+				var clientId = req.query.id;
+				var clientIdList = clientId.split(',');
+				var result = [];
+				var requestNumber = clientIdList.length;
+				// Starting send the deploy requests
+				for (var i = 0 ; i < clientIdList.length ; i++) {
+					var _id = clientIdList[i];
+					var clientList = ADSConfig.client_list;
+					for (var j = 0 ; j < clientList.length ; j++) {
+						if (clientList[i]._id == _id) {
+							requestDeploy(
+								clientList[i].ip,
+								clientList[i].port,
+								clientList[i].secret,
+								clientList[i].command_list,
+								function(response) {
+									response = JSON.parse(response);
+									result.push({
+										ip: clientList[i].ip,
+										port: clientList[i].port,
+										command_list: clientList[i].command_list,
+										result: response
+									});
+
+									requestNumber--;
+									if (requestNumber == 0) {
+										// Respond the result
+										var resp = {
+											'code': 200,
+											'result': result
+										}
+										res.json(resp);
+									}
+								});
+							break;
+						}
+					}
+				}
+			//} catch(e) {
+			//	res.status(400).send(e);
+			//}
+		} else {
+			res.status(403).send('');
+		}
+	});
 
 	// Login
 	serverApp.post('/api/login', function(req, res) {
@@ -192,7 +292,7 @@ if (config.is_server) {
 							clientList[i].port = port;
 							clientList[i].secret = secret;
 							var commandList = command.split('\n');
-							clientList[i].command_llist = commandList;
+							clientList[i].command_list = commandList;
 							break;
 						}
 					}
@@ -277,11 +377,11 @@ if (config.is_client) {
 					result.push(stdout);
 					i++;
 					if (i == commandList.length) {
-						resp = {
+						var resp = {
 							'code': 200,
 							'result': result
 						}
-						res.send(resp);
+						res.json(resp);
 					} else {
 						cwd = checkCD(commandList[i], cwd);
 						deploy(commandList[i], cwd, handleDeploy);
