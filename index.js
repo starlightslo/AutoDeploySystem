@@ -119,18 +119,18 @@ if (config.is_server) {
 					var _id = clientIdList[i];
 					var clientList = ADSConfig.client_list;
 					for (var j = 0 ; j < clientList.length ; j++) {
-						if (clientList[i]._id == _id) {
+						if (clientList[j]._id == _id) {
 							requestDeploy(
-								clientList[i].ip,
-								clientList[i].port,
-								clientList[i].secret,
-								clientList[i].command_list,
+								clientList[j].ip,
+								clientList[j].port,
+								clientList[j].secret,
+								clientList[j].command_list,
 								function(response) {
 									response = JSON.parse(response);
 									result.push({
-										ip: clientList[i].ip,
-										port: clientList[i].port,
-										command_list: clientList[i].command_list,
+										ip: clientList[j].ip,
+										port: clientList[j].port,
+										commandList: clientList[j].command_list,
 										result: response
 									});
 

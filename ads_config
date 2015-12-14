@@ -1,14 +1,1 @@
-{
-	"client_list": [
-		{
-			"_id": 1,
-			"ip": "127.0.0.1",
-			"port": 7778,
-			"secret": "ABCDEFG1234567890HIJKLMN",
-			"command_list": [
-				"cd /home/ubuntu/project",
-				"git pull"
-			]
-		}
-	]
-}
+{"client_list":[{"_id":1,"ip":"127.0.0.1","port":7778,"secret":"ABCDEFG1234567890HIJKLMN","command_list":["ls"]}]}
