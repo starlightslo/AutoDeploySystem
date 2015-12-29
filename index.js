@@ -4,7 +4,6 @@ var config = require('./config');
 var server = require("./modules/server");
 
 // Load ADS Config file
-//var ADSConfig = require('./ads_config');
 var fs = require('fs');
 var ADSConfigFile = './ads_config';
 var ADSConfig = JSON.parse(fs.readFileSync(ADSConfigFile).toString());
@@ -239,10 +238,18 @@ if (config.is_server) {
 					var port = req.body.port;
 					var secret = req.body.secret;
 					var command = req.body.command;
-					var commandList = command.split('\n');
+					if (command && command.length > 0) {
+						var commandList = command.split('\n');
+					} else {
+						var commandList = []
+					}
 
 					// Generating the client id
-					var _id = (ADSConfig.client_list[ADSConfig.client_list.length-1]._id) + 1;
+					if (ADSConfig.client_list.length == 0) {
+						var _id = 1
+					} else {
+						var _id = (ADSConfig.client_list[ADSConfig.client_list.length-1]._id) + 1;
+					}
 					console.log('add new id: ' + _id);
 					var client = {
 						_id: _id,
@@ -337,7 +344,7 @@ if (config.is_server) {
 					var clientList = ADSConfig.client_list;
 					for (var i=0 ; i < clientList.length ; i++) {
 						if (clientList[i]._id == _id) {
-							clientList.splice(i);
+							clientList.splice(i, 1);
 							break;
 						}
 					}
