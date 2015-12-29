@@ -1,9 +1,31 @@
 var myApp = angular.module('myApp');
 
-myApp.controller('ADSController', ['$scope', '$http', '$location', '$routeParams', function($scope, $http, $location, $routeParams) {
+myApp.factory('ClientFactory', function($http){
+	var factory = {}
+	factory.getClients = function(callback) {
+		$http.get('/api/clients').success(function(response) {
+			if (response.code != 200) {
+				callback([])
+			} else {
+				var clients = response.result;
+				for (var i = 0 ; i < clients.length ; i++) {
+					var commands = '';
+					for (var j = 0 ; j < clients[i].command_list.length ; j++) {
+						if (j != 0) commands += '\n';
+						commands += clients[i].command_list[j];
+					}
+					clients[i].command_list = commands;
+				}
+				callback(clients)
+			}
+		});
+	}
+	return factory
+})
+
+myApp.controller('ADSController', function($rootScope, $scope, $http, $location, $routeParams, ClientFactory) {
 	$scope.getLogin = function() {
 		$http.get('/api/is_login').success(function(response) {
-			console.log('response: '+ response);
 			if (response == '1') {
 				$location.path("/admin");
 			} else {
@@ -32,7 +54,6 @@ myApp.controller('ADSController', ['$scope', '$http', '$location', '$routeParams
 				$location.path("/");
 			} else {
 				var clients = response.result;
-				console.log(clients.length);
 				for (var i = 0 ; i < clients.length ; i++) {
 					var commands = '';
 					for (var j = 0 ; j < clients[i].command_list.length ; j++) {
@@ -53,24 +74,21 @@ myApp.controller('ADSController', ['$scope', '$http', '$location', '$routeParams
 			secret: $scope.client.secret,
 			command: $scope.client.command_list
 		}
-		console.log('add ip: ' + client.ip);
 		$http.put('/api/client/add/', client).success(function(response) {
-			console.log('add response: ' + response);
 			$location.path("/");
 		});
 	}
 
-	$scope.deleteClient = function() {
-		var _id = $routeParams._id;
-		console.log('id: ' + _id);
+	$scope.deleteClient = function(index) {
+		var _id = $scope.clients[index]._id;
 		$http.delete('/api/client/delete/' + _id).success(function(response) {
-			console.log('delete response: ' + response);
-			$location.path("/admin");
+			ClientFactory.getClients(function(clients) {
+				$scope.clients = clients;
+			});
 		});
 	}
 
 	$scope.modifyClient = function(index) {
-		console.log(index);
 		var client = {
 			_id: $scope.clients[index]._id,
 			ip: $scope.clients[index].ip,
@@ -78,11 +96,11 @@ myApp.controller('ADSController', ['$scope', '$http', '$location', '$routeParams
 			secret: $scope.clients[index].secret,
 			command: $scope.clients[index].command_list
 		}
-		console.log('modify id: ' + $scope.clients[index]._id);
 
 		$http.post('/api/client/modify/', client).success(function(response) {
-			console.log('modify response: ' + response);
-			$location.path("/admin");
+			ClientFactory.getClients(function(clients) {
+				$scope.clients = clients;
+			});
 		});
 	}
-}]);
+});
